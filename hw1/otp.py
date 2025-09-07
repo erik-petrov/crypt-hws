@@ -24,18 +24,20 @@ def ib(i, length):
 
 def encrypt(pfile, kfile, cfile):
     # your implementation here
-    pfileint = bi(open(pfile, 'rb').read())
+    pfileD = open(pfile, 'rb').read()
+    pfileint = bi(pfileD)
     kfileint = bi(open(kfile, 'rb').read())
     final = pfileint ^ kfileint
-    open(cfile, 'wb').write(ib(final, 6))
+    open(cfile, 'wb').write(ib(final, len(pfileD)))
     return 
 
 def decrypt(cfile, kfile, pfile):
     # your implementation here
+    cfileD = open(cfile, 'rb').read()
     cfileint = bi(open(cfile, 'rb').read())
     kfileint = bi(open(kfile, 'rb').read())
     final = cfileint ^ kfileint
-    open(pfile, 'wb').write(ib(final, 6))
+    open(pfile, 'wb').write(ib(final, len(cfileD)))
     pass
 
 def usage():
