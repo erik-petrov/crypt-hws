@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import os, sys       # do not use any other imports/libraries
-# took x.y hours (please specify here how much time your solution required)
+# took 2.5 hours (please specify here how much time your solution required)
 
 def bi(b):
     # b - bytes to encode as an integer
