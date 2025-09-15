@@ -29,16 +29,14 @@ def encrypt(pfile, kfile, cfile):
     kfileint = bi(open(kfile, 'rb').read())
     final = pfileint ^ kfileint
     open(cfile, 'wb').write(ib(final, len(pfileD)))
-    return 
-
+    
 def decrypt(cfile, kfile, pfile):
     # your implementation here
     cfileD = open(cfile, 'rb').read()
-    cfileint = bi(open(cfile, 'rb').read())
+    cfileint = bi(cfileD)
     kfileint = bi(open(kfile, 'rb').read())
     final = cfileint ^ kfileint
     open(pfile, 'wb').write(ib(final, len(cfileD)))
-    pass
 
 def usage():
     print("Usage:")
