@@ -5,7 +5,7 @@ from pyasn1.codec.der import decoder
 sys.path = sys.path[1:] # don't remove! otherwise the library import below will try to import your hmac.py
 import hmac # do not use any other imports/libraries
 
-# took x.y hours (please specify here how much time your solution required)
+# took 2 hours (please specify here how much time your solution required)
 
 #==== ASN1 encoder start ====
 def bi(b):
@@ -177,8 +177,6 @@ def verify(filename):
         print("[-] Wrong key or message has been manipulated!")
     else:
         print("[+] HMAC verification successful!")
-
-
 
 def usage():
     print("Usage:")
