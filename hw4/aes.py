@@ -211,19 +211,23 @@ def decrypt(cfile, pfile):
     
     iter = asn1[0][1]
     salt = asn1[0][0]
-    keys = pbkdf2_hmac('sha1', pswd, salt, iter, 48)
+    keys = pbkdf2_hmac('sha1', pswd.encode(), salt.asOctets(), iter, 48)
 
     k_e = keys[:16]
     k_m = keys[16:]
 
-    iv = asn1[1][1]
-    mac_k = asn1[2[1]]
+    iv = asn1[1][1].asOctets()
+    mac_k = asn1[2][1]
 
-    mac = hmac.new(k_m, iv+ciphertext, hashlib.sha256).digest()
+    i_c = iv+ciphertext
+
+    print(type(i_c))
+
+    mac = hmac.new(k_m, i_c, hashlib.sha256).digest()
     
     cipher = AES.new(k_e, AES.MODE_ECB)
 
-    if not hmac.compare_digest(mac, mac_k):
+    if not hmac.compare_digest(mac, mac_k.asOctets()):
         print("[!] wrong pswd")
         sys.exit(1)
 
