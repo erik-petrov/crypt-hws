@@ -4,3 +4,4 @@ expected
 what
 *.tgz
 file_*
+.venv
