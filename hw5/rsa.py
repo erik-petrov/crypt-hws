@@ -169,7 +169,7 @@ def encrypt(keyfile, plaintextfile, ciphertextfile):
     keys = get_pubkey(keyfile)
     padded = pkcsv15pad_encrypt(open(plaintextfile, 'rb').read(), keys[0])
     ciphertext = pow(bi(padded), keys[1], keys[0])
-    c_b = ib(ciphertext, (keys[0].bit_length + 7) // 8)
+    c_b = ib(ciphertext, (keys[0].bit_length() + 7) // 8)
     with open(ciphertextfile, 'wb') as f: 
         f.write(c_b) 
 
@@ -182,7 +182,7 @@ def decrypt(keyfile, ciphertextfile, plaintextfile):
     mod = keys[0]
     exp = keys[1]
     m = pow(c_i, exp, mod)
-    dec = ib(m, (mod.bit_length + 7) // 8)
+    dec = ib(m, (mod.bit_length() + 7) // 8)
     dec = pkcsv15pad_remove(dec)
     with open(plaintextfile, 'wb') as f:
         f.write(dec)
@@ -206,7 +206,7 @@ def sign(keyfile, filetosign, signaturefile):
     b_i = bi(padded)
     sig = (b_i, exp, mod)
     with open(signaturefile, 'wb') as f:
-        f.write(ib(sig, mod.bit_length))
+        f.write(ib(sig, mod.bit_length()))
 
     # Warning: make sure that signaturefile produced has the same
     # length as the modulus (hint: use parametrized ib()).
@@ -221,7 +221,7 @@ def verify(keyfile, signaturefile, filetoverify):
         b_i = bi(f.read())
 
     dec = pow(b_i, exp, mod)
-    padded = ib(dec, mod.bit_length)
+    padded = ib(dec, mod.bit_length())
     dig = pkcsv15pad_remove(padded)
 
     comp = digestinfo_der(filetoverify)
