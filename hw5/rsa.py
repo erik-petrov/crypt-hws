@@ -210,7 +210,7 @@ def sign(keyfile, filetosign, signaturefile):
     dig = digestinfo_der(filetosign)
     padded = pkcsv15pad_sign(dig, mod)
     b_i = bi(padded)
-    sig = (b_i, exp, mod)
+    sig = pow(b_i, exp, mod)
     with open(signaturefile, 'wb') as f:
         f.write(ib(sig, mod.bit_length()))
 
