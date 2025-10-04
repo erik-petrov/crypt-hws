@@ -244,8 +244,6 @@ def usage():
     print("verify <public key file> <signature file> <file to verify>")
     sys.exit(1)
 
-print(get_privkey("./hw5/priv.pem"))
-
 if len(sys.argv) != 5:
     usage()
 elif sys.argv[1] == 'encrypt':
