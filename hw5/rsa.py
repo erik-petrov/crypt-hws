@@ -116,6 +116,9 @@ def get_pubkey(filename):
     with open(filename, 'rb') as f:
         data = f.read()
     
+    if "-----BEGIN" in data:
+        data = pem_to_der(data)
+
     der = decoder.decode(data)
     # DER-decode the DER to get RSAPublicKey DER structure, which is encoded as BITSTRING
     pubkey = decoder.decode(der[0][1].asOctets())[0] #as octets makes converts BITSTRING to bytestring
@@ -125,6 +128,9 @@ def get_privkey(filename):
     # reads private key file encoded using PrivateKeyInfo (PKCS#8) structure and returns (N, d)
     with open(filename, 'rb') as f:
         data = f.read()
+
+    if "-----BEGIN" in data:
+        data = pem_to_der(data)
     
     der = decoder.decode(data)
 
