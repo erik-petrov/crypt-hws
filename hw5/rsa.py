@@ -212,7 +212,7 @@ def sign(keyfile, filetosign, signaturefile):
     b_i = bi(padded)
     sig = pow(b_i, exp, mod)
     with open(signaturefile, 'wb') as f:
-        f.write(ib(sig, mod.bit_length()))
+        f.write(ib(sig, mod.bit_length() // 8))
 
     # Warning: make sure that signaturefile produced has the same
     # length as the modulus (hint: use parametrized ib()).
@@ -227,9 +227,8 @@ def verify(keyfile, signaturefile, filetoverify):
         b_i = bi(f.read())
 
     dec = pow(b_i, exp, mod)
-    padded = ib(dec, mod.bit_length())
+    padded = ib(dec, mod.bit_length() // 8)
     dig = pkcsv15pad_remove(padded)
-
     comp = digestinfo_der(filetoverify)
     if comp != dig:
         print("Verification failure")
