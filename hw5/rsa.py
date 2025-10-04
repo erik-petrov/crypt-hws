@@ -116,7 +116,7 @@ def get_pubkey(filename):
     with open(filename, 'rb') as f:
         data = f.read()
     
-    if "-----BEGIN" in data:
+    if "-----BEGIN" in str(data):
         data = pem_to_der(data)
 
     der = decoder.decode(data)
@@ -129,7 +129,7 @@ def get_privkey(filename):
     with open(filename, 'rb') as f:
         data = f.read()
 
-    if "-----BEGIN" in data:
+    if "-----BEGIN" in str(data):
         data = pem_to_der(data)
     
     der = decoder.decode(data)
@@ -243,6 +243,8 @@ def usage():
     print("sign <private key file> <file to sign> <signature output file>")
     print("verify <public key file> <signature file> <file to verify>")
     sys.exit(1)
+
+print(get_privkey("./hw5/priv.pem"))
 
 if len(sys.argv) != 5:
     usage()
