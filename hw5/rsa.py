@@ -33,6 +33,10 @@ def bi(b):
     return i
 
 #==== ASN1 encoder start ====
+def asn1_null():
+    # returns DER encoding of NULL
+    return bytes([0x05])+bytes([0x00])
+
 def ibOid(i):
     b=b''
     ln=numOfBytesNeeded(i, 7)
@@ -197,7 +201,10 @@ def digestinfo_der(filename):
     # returns ASN.1 DER encoded DigestInfo structure containing SHA256 digest of file
     with open(filename, 'rb') as f:
         der = asn1_sequence(
-            asn1_objectidentifier([3,16,840,1,101,3,4,2,1])+
+            asn1_sequence(
+                asn1_objectidentifier([2,16,840,1,101,3,4,2,1])+
+                asn1_null()
+            )+
             asn1_octetstring(hashlib.sha256(f.read()).digest())
         )
     return der
