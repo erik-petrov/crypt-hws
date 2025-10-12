@@ -154,8 +154,8 @@ def ecdsa_sign(keyfile, filetosign, signaturefile):
     h_i = bi(hash)
     # generate a random nonce k in the range [1, n-1]
     while True:
-        k = bi(os.urandom(64)) % 201
-        if k > 200:
+        k = bi(os.urandom(64)) % n+1
+        if k > n:
             continue
         else:
             break
