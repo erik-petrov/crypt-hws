@@ -174,7 +174,7 @@ def ecdsa_sign(keyfile, filetosign, signaturefile):
     # DER-encode r and s
     der = asn1_sequence(
         asn1_integer(r) + 
-        asn1_integer(s)
+        asn1_integer(s%n)
     )
     # write DER structure to file
     with open(signaturefile, 'wb') as f:
@@ -191,7 +191,7 @@ def ecdsa_verify(keyfile, signaturefile, filetoverify):
     with open(signaturefile, 'rb') as f:
         der = decoder.decode(f.read())
         r = int(der[0][0])%n
-        s = int(der[0][1])%n
+        s = int(der[0][1])
 
     if r not in range(1, n-1) or s not in range(1, n-1):
         print("Verification failure")
