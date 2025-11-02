@@ -75,6 +75,16 @@ def canonicalize(full_xml, tagname):
     lxml.etree.ElementTree(et.find('.//{*}'+tagname)).write_c14n(output)
     return output.getvalue()
 
+def canonicalize_by_id(full_xml_bytes, element_id):
+    # returns XML canonicalization of an element with the specified Id
+    parser = lxml.etree.XMLParser(dtd_validation=False)
+    et = lxml.etree.XML(full_xml_bytes, parser)
+    element_to_c14n = et.xpath(f"//*[@Id='{element_id[1:]}']")
+
+    output = io.BytesIO()
+    lxml.etree.ElementTree(element_to_c14n[0]).write_c14n(output)
+    return output.getvalue()
+
 def get_subject_cn(cert_der):
     # returns CommonName value from the certificate's Subject Distinguished Name field
     # looping over Distinguished Name entries until CN found
@@ -86,18 +96,61 @@ def get_subject_cn(cert_der):
 filename = sys.argv[1]
 
 # get and decode XML
-
 zip = zipfile.ZipFile(filename, 'r')
-xmldoc = zip.read('META-INF/signatures0.xml')
+xmldoc_bytes = zip.read('META-INF/signatures0.xml')
+xmldoc = BeautifulSoup(xmldoc_bytes, 'xml')
 
 # let's trust this certificate
 signers_cert_der = codecs.decode(xmldoc.XAdESSignatures.KeyInfo.X509Data.X509Certificate.encode_contents(), 'base64')
 print("[+] Signatory:", get_subject_cn(signers_cert_der))
 
-print(xmldoc)
-# perform all kinds of checks
+signed_info = xmldoc.find('SignedInfo')
+references = signed_info.find_all('Reference')
 
+for ref in references:
+    uri = ref['URI']
+    ref_digest_expected = codecs.decode(ref.find('DigestValue').string.encode('utf-8'), 'base64')
+    
+    if uri.startswith('#'):
+        c14n_signed_props = canonicalize_by_id(xmldoc_bytes, uri)
+        ref_digest_calculated = hashlib.sha256(c14n_signed_props).digest()
+        
+        if ref_digest_calculated != ref_digest_expected:
+            print(f"[-] SignedProperties digest mismatch")
+            sys.exit(1)
+    else:
+        file_bytes = zip.read(uri)
+        
+        ref_digest_calculated = hashlib.sha256(file_bytes).digest()
+        
+        if ref_digest_calculated != ref_digest_expected:
+            print(f"[-] Signed file '{uri}' has been modified")
+            sys.exit(1)
+        
+        print(f"[+] Signed file: {uri}")
+
+# perform all kinds of checks
+tsa_b64 = xmldoc.find('EncapsulatedTimeStamp').string
+tsa_resp = codecs.decode(tsa_b64.encode('utf-8'), 'base64')
+ts, ts_digestinfo = parse_tsa_response(tsa_resp)
 print("[+] Timestamped: %s +00:00" % (ts))
+
+ocsp_b64 = xmldoc.find('EncapsulatedOCSPValue').string
+ocsp_resp = codecs.decode(ocsp_b64.encode('utf-8'), 'base64')
+certID_serial, certStatus, thisUpdate = parse_ocsp_response(ocsp_resp)
+
+if ts > thisUpdate:
+    print("[-] timestamp is bigger than thisUpdate in OCSP response")
+    sys.exit(1)
+
+if certStatus != 'good':
+    print(f"[-] certificate status is '{certStatus}', not 'good'")
+    sys.exit(1)
+
+sig_val_b64 = xmldoc.find('SignatureValue').string
+signature_value = codecs.decode("".join(sig_val_b64.split()).encode('utf-8'), 'base64')
+
+signed_info_str = canonicalize(xmldoc_bytes, 'SignedInfo')
 
 # finally verify signatory's signature
 if verify_ecdsa(signers_cert_der, signature_value, hashlib.sha384(signed_info_str).digest()):
